@@ -14,6 +14,7 @@ func Routes() *fiber.App {
 	admin.Post("/login", controllers.LoginAdmin)
 	user := app.Group("/user")
 	user.Post("/register", controllers.RegisterUser)
+	user.Post("/login", controllers.LoginUser)
 
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "MyService Metrics Page"}))
 	app.Use(logger.New(logger.Config{
