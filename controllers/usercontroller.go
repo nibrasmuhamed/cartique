@@ -64,3 +64,35 @@ func LoginUser(c *fiber.Ctx) error {
 	res := models.UserResponse{Id: int(user.ID), Username: user.Username, Email: user.Email}
 	return c.Status(200).JSON(fiber.Map{"details": res, "message": "success", "access_token": token, "refresh_token": uuidv4})
 }
+
+func VerifyUser(c *fiber.Ctx) error {
+	t := c.Get("Authorization")
+	t = t[7:]
+	id := util.GetidfromToken(t)
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	var p models.User
+	db.Where("id = ?", id).First(&p)
+	if x := util.SendOtp(p.Phone); !x {
+		return c.Status(500).JSON(fiber.Map{"message": "internal sever error"})
+	}
+	return c.JSON(fiber.Map{"message": "success"})
+}
+
+func VerifyUserOtp(c *fiber.Ctx) error {
+	otp := c.Params("id")
+	t := c.Get("Authorization")
+	t = t[7:]
+	id := util.GetidfromToken(t)
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	var p models.User
+	db.Where("id = ?", id).First(&p)
+	verified := util.CheckOtp(p.Phone, otp)
+	if !verified {
+		return c.Status(400).JSON(fiber.Map{"message": "cannot verify"})
+	}
+	p.Verified = true
+	db.Save(&p)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}

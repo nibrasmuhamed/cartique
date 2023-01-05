@@ -35,6 +35,26 @@ func CheckToken(t string) (bool, error) {
 	return false, UnknownError
 }
 
+func GetidfromToken(t string) float64 {
+	key := []byte(os.Getenv("KEY"))
+	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("There was an error in parsing")
+		}
+		return key, nil
+	})
+	if err != nil {
+		log.Println(err)
+		return 0
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if claims["role"] == "user" {
+			return claims["id"].(float64)
+		}
+	}
+	return 0
+}
+
 func GenerateJWT(id int, role string) (string, error) {
 	var mySigningKey = []byte(os.Getenv("KEY"))
 	token := jwt.New(jwt.SigningMethodHS256)

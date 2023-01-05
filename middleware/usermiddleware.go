@@ -15,6 +15,6 @@ func UserMiddleware(c *fiber.Ctx) error {
 	if !verified {
 		return c.Status(401).JSON(fiber.Map{"message": "user not authorized"})
 	}
-	return c.Status(200).JSON(fiber.Map{"message": "success"})
-	// return c.Next()
+	// return c.Status(200).JSON(fiber.Map{"message": "success"})
+	return c.Next()
 }
