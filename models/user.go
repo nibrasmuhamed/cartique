@@ -12,6 +12,7 @@ type User struct {
 	Password      string `json:"password"`
 	Verified      bool   `json:"verified"`
 	Otp           int    `json:"otp"`
+	Blocked       bool   `json:"blocked"`
 	Refresh_token string `json:"refresh_token"`
 }
 

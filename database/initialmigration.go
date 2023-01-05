@@ -19,6 +19,7 @@ func InitDB() {
 	}
 	db.AutoMigrate(models.User{})
 	db.AutoMigrate(models.Admin{})
+
 	defer CloseDb(db)
 }
 

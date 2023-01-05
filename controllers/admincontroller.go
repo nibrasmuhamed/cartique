@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/nibrasmuhamed/cartique/database"
@@ -58,4 +59,15 @@ func RegisterAdmin(c *fiber.Ctx) error {
 	db.Create(&u)
 	c.SendStatus(200)
 	return c.JSON(fiber.Map{"message": "success"})
+}
+
+func ViewUsers(c *fiber.Ctx) error {
+	l, _ := strconv.Atoi(c.Query("limit"))
+	o, _ := strconv.Atoi(c.Query("offset"))
+
+	var users []models.UserResponse
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	db.Model(models.User{}).Limit(l).Offset(o).Find(&users)
+	return c.Status(200).JSON(fiber.Map{"message": "success", "users": users})
 }

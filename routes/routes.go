@@ -13,6 +13,8 @@ func Routes() *fiber.App {
 	admin := app.Group("/admin")
 	admin.Post("/register", controllers.RegisterAdmin)
 	admin.Post("/login", controllers.LoginAdmin)
+	admin.Get("/users", controllers.ViewUsers)
+
 	user := app.Group("/user")
 	user.Post("/register", controllers.RegisterUser)
 	user.Post("/login", controllers.LoginUser)
