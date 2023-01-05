@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/nibrasmuhamed/cartique/controllers"
+	"github.com/nibrasmuhamed/cartique/middleware"
 )
 
 func Routes() *fiber.App {
@@ -15,6 +16,7 @@ func Routes() *fiber.App {
 	user := app.Group("/user")
 	user.Post("/register", controllers.RegisterUser)
 	user.Post("/login", controllers.LoginUser)
+	user.Get("/", middleware.UserMiddleware)
 
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "MyService Metrics Page"}))
 	app.Use(logger.New(logger.Config{
