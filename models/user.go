@@ -24,3 +24,10 @@ type UserResponse struct {
 	Email         string `json:"email"`
 	Refresh_token string `json:"refresh_token"`
 }
+
+type UserRegister struct {
+	Name     string `json:"username"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+}
