@@ -6,7 +6,7 @@ import (
 	"github.com/nibrasmuhamed/cartique/util"
 )
 
-func PasswordTest(t *testing.T) {
+func TestPassword(t *testing.T) {
 	got := util.Password("hellor")
 	if got {
 		t.Errorf("Abs(-1) = %v; want 1", got)
@@ -15,4 +15,5 @@ func PasswordTest(t *testing.T) {
 	if !got {
 		t.Error("this should pass")
 	}
+
 }

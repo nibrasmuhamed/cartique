@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	uuid "github.com/google/UUID"
 	"github.com/nibrasmuhamed/cartique/database"
 	"github.com/nibrasmuhamed/cartique/models"
 	"github.com/nibrasmuhamed/cartique/util"
@@ -54,7 +55,12 @@ func LoginUser(c *fiber.Ctx) error {
 		c.SendStatus(401)
 		return c.JSON(fiber.Map{"message": "email or password is incorrect"})
 	}
+	token, err := util.GenerateJWT(int(user.ID), "user")
+	if err != nil {
+		log.Println(err)
+	}
+	uuidv4, _ := uuid.NewRandom()
+	db.Model(&user).Update("refresh_token", uuidv4)
 	res := models.UserResponse{Id: int(user.ID), Username: user.Username, Email: user.Email}
-	c.Status(200)
-	return c.JSON(fiber.Map{"details": res, "message": "success"})
+	return c.Status(200).JSON(fiber.Map{"details": res, "message": "success", "access_token": token, "refresh_token": uuidv4})
 }

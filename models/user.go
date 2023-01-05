@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -19,10 +21,9 @@ type UserLogin struct {
 }
 
 type UserResponse struct {
-	Id            int    `json:"id"`
-	Username      string `json:"username"`
-	Email         string `json:"email"`
-	Refresh_token string `json:"refresh_token"`
+	Id       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
 type UserRegister struct {
