@@ -61,7 +61,7 @@ func LoginAdmin(c *fiber.Ctx) error {
 		c.SendStatus(403)
 		return c.JSON(fiber.Map{"message": "username or password is incorrect"})
 	}
-	token, _ := util.GenerateJWT(admindb.Id, "admin")
+	token, _ := util.GenerateJWT(admindb.Id, "admin", 5)
 	ar := models.AdminResponse{Id: admindb.Id, Email: admindb.Email, Username: admindb.Username}
 	c.SendStatus(200)
 	return c.JSON(fiber.Map{"message": "login successful",
@@ -93,7 +93,7 @@ func Refresh_token_admin(c *fiber.Ctx) error {
 		db.Save(&a)
 		return c.Status(401).JSON(fiber.Map{"message": "your refresh token has been edited"})
 	}
-	token, _ := util.GenerateJWT(int(id), "user")
+	token, _ := util.GenerateJWT(int(id), "user", 5)
 	uuidv4, _ := uuid.NewRandom()
 	db.Model(&a).Update("refresh_token", uuidv4)
 	return c.Status(200).JSON(fiber.Map{"message": "success",

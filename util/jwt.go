@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -75,14 +76,14 @@ func GetidfromToken(t string) float64 {
 	return 0
 }
 
-func GenerateJWT(id int, role string) (string, error) {
+func GenerateJWT(id int, role string, duration int) (string, error) {
 	var mySigningKey = []byte(os.Getenv("KEY"))
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 
 	claims["id"] = id
 	claims["role"] = role
-	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * time.Duration(duration)).Unix()
 
 	tokenString, err := token.SignedString(mySigningKey)
 
@@ -91,4 +92,13 @@ func GenerateJWT(id int, role string) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func GetAuthRef(c *fiber.Ctx) (string, string, error) {
+	t := c.Get("Authorization")
+	r := c.Get("refresh_token")
+	if t == "" || r == "" {
+		return "", "", errors.New("not found r and t")
+	}
+	return t[7:], r, nil
 }

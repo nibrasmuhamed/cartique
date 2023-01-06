@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -64,7 +65,7 @@ func LoginUser(c *fiber.Ctx) error {
 	if user.Blocked {
 		return c.Status(400).JSON(fiber.Map{"message": "your account is suspended by cartique"})
 	}
-	token, err := util.GenerateJWT(int(user.ID), "user")
+	token, err := util.GenerateJWT(int(user.ID), "user", 5)
 	if err != nil {
 		log.Println(err)
 	}
@@ -135,9 +136,29 @@ func RefreshToken(c *fiber.Ctx) error {
 		db.Save(&u)
 		return c.Status(401).JSON(fiber.Map{"message": "your refresh token has been expired"})
 	}
-	token, _ := util.GenerateJWT(int(id), "user")
+	token, _ := util.GenerateJWT(int(id), "user", 5)
 	uuidv4, _ := uuid.NewRandom()
 	db.Model(&u).Update("refresh_token", uuidv4)
 	return c.Status(200).JSON(fiber.Map{"message": "success",
 		"access_token": token, "refresh_token": uuidv4})
+}
+
+func Logout(c *fiber.Ctx) error {
+	t, _, err := util.GetAuthRef(c)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"message": "user token not found"})
+	}
+	id := util.GetidfromToken(t)
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	var u models.User
+	db.Where("id = ?", id).First(&u)
+	u.Refresh_token = ""
+	db.Save(&u)
+	t, err = util.GenerateJWT(int(id), "user", 0)
+	if err != nil {
+		fmt.Println("something")
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "logged out",
+		"access_token": t})
 }
