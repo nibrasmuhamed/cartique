@@ -24,7 +24,7 @@ func Routes() *fiber.App {
 	user.Get("/verify/:id", middleware.UserMiddleware, controllers.VerifyUserOtp)
 	user.Get("/refresh", controllers.RefreshToken)
 	user.Get("/logout", controllers.Logout)
-
+	app.Static("/", "./public")
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "MyService Metrics Page"}))
 	app.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
