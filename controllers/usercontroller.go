@@ -17,6 +17,12 @@ func RegisterUser(c *fiber.Ctx) error {
 		c.SendStatus(500)
 		return c.JSON(fiber.Map{"message": "internal server error"})
 	}
+	if validEmail := util.ValidMailAddress(u.Email); !validEmail {
+		return c.Status(400).JSON(fiber.Map{"message": "enter a valid email"})
+	}
+	if u.Password != u.Password1 {
+		return c.Status(400).JSON(fiber.Map{"message": "password do not match"})
+	}
 	db := database.OpenDb()
 	defer database.CloseDb(db)
 	var d int64
@@ -54,6 +60,9 @@ func LoginUser(c *fiber.Ctx) error {
 	if verified := util.VerifyPassword(u.Password, user.Password); !verified {
 		c.SendStatus(401)
 		return c.JSON(fiber.Map{"message": "email or password is incorrect"})
+	}
+	if user.Blocked {
+		return c.Status(400).JSON(fiber.Map{"message": "your account is suspended by cartique"})
 	}
 	token, err := util.GenerateJWT(int(user.ID), "user")
 	if err != nil {
@@ -95,4 +104,34 @@ func VerifyUserOtp(c *fiber.Ctx) error {
 	p.Verified = true
 	db.Save(&p)
 	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}
+
+func RefreshToken(c *fiber.Ctx) error {
+	t := c.Get("Authorization")
+	r := c.Get("refresh_token")
+	if t == "" || r == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "access token or refresh token not found"})
+	}
+	t = t[7:]
+	var u models.User
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	verified, _ := util.CheckToken(t)
+	if !verified {
+		u.Refresh_token = ""
+		db.Save(&u)
+		return c.Status(401).JSON(fiber.Map{"message": "user not authorized"})
+	}
+	id := int(util.GetidfromToken(string(t)))
+	db.Where("id = ?", id).First(&u)
+	if r != u.Refresh_token {
+		u.Refresh_token = ""
+		db.Save(&u)
+		return c.Status(401).JSON(fiber.Map{"message": "your refresh token has been edited"})
+	}
+	token, _ := util.GenerateJWT(int(id), "user")
+	uuidv4, _ := uuid.NewRandom()
+	db.Model(&u).Update("refresh_token", uuidv4)
+	return c.Status(200).JSON(fiber.Map{"message": "success",
+		"access_token": token, "refresh_token": uuidv4})
 }

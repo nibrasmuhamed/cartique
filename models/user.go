@@ -28,8 +28,9 @@ type UserResponse struct {
 }
 
 type UserRegister struct {
-	Name     string `json:"username"`
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
+	Name      string `json:"username"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	Password  string `json:"password"`
+	Password1 string `json:"password1"`
 }

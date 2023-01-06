@@ -13,13 +13,16 @@ func Routes() *fiber.App {
 	admin := app.Group("/admin")
 	admin.Post("/register", controllers.RegisterAdmin)
 	admin.Post("/login", controllers.LoginAdmin)
-	admin.Get("/users", controllers.ViewUsers)
+	admin.Get("/user_managment", controllers.ViewUsers)
+	admin.Get("/user_managment/block/:id", controllers.BlockUsers)
+	admin.Get("/user_managment/unblock/:id", controllers.UnBlockUsers)
 
 	user := app.Group("/user")
 	user.Post("/register", controllers.RegisterUser)
 	user.Post("/login", controllers.LoginUser)
 	user.Get("/verify", middleware.UserMiddleware, controllers.VerifyUser)
 	user.Get("/verify/:id", middleware.UserMiddleware, controllers.VerifyUserOtp)
+	user.Get("/refresh", controllers.RefreshToken)
 
 	app.Get("/metrics", monitor.New(monitor.Config{Title: "MyService Metrics Page"}))
 	app.Use(logger.New(logger.Config{

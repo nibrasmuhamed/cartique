@@ -11,6 +11,36 @@ import (
 	"gorm.io/gorm"
 )
 
+func UnBlockUsers(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	var u models.User
+	db.Where("id = ?", id).First(&u)
+	if u.Email == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "cannot find the user"})
+	}
+	u.Blocked = false
+	u.Refresh_token = ""
+	db.Save(&u)
+	return c.Status(200).JSON(fiber.Map{"message": "user unblocked succesfully"})
+}
+
+func BlockUsers(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	var u models.User
+	db.Where("id = ?", id).First(&u)
+	if u.Email == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "cannot find the user"})
+	}
+	u.Blocked = true
+	u.Refresh_token = ""
+	db.Save(&u)
+	return c.Status(200).JSON(fiber.Map{"message": "user blocked succesfully"})
+}
+
 func LoginAdmin(c *fiber.Ctx) error {
 	a := new(models.AdminLogin)
 	var admindb models.Admin
