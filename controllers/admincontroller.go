@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	uuid "github.com/google/UUID"
 	"github.com/nibrasmuhamed/cartique/database"
 	"github.com/nibrasmuhamed/cartique/models"
 	"github.com/nibrasmuhamed/cartique/util"
@@ -60,8 +61,43 @@ func LoginAdmin(c *fiber.Ctx) error {
 		c.SendStatus(403)
 		return c.JSON(fiber.Map{"message": "username or password is incorrect"})
 	}
+	token, _ := util.GenerateJWT(admindb.Id, "admin")
+	ar := models.AdminResponse{Id: admindb.Id, Email: admindb.Email, Username: admindb.Username}
 	c.SendStatus(200)
-	return c.JSON(fiber.Map{"message": "login successful"})
+	return c.JSON(fiber.Map{"message": "login successful",
+		"details":      ar,
+		"access_token": token})
+}
+
+func Refresh_token_admin(c *fiber.Ctx) error {
+
+	t := c.Get("Authorization")
+	r := c.Get("refresh_token")
+	if t == "" || r == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "access token or refresh token not found"})
+	}
+	t = t[7:]
+	var a models.Admin
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	verified, _ := util.CheckToken(t)
+	if !verified {
+		a.Refresh_token = ""
+		db.Save(&a)
+		return c.Status(401).JSON(fiber.Map{"message": "user not authorized"})
+	}
+	id := int(util.GetidfromToken(string(t)))
+	db.Where("id = ?", id).First(&a)
+	if r != a.Refresh_token {
+		a.Refresh_token = ""
+		db.Save(&a)
+		return c.Status(401).JSON(fiber.Map{"message": "your refresh token has been edited"})
+	}
+	token, _ := util.GenerateJWT(int(id), "user")
+	uuidv4, _ := uuid.NewRandom()
+	db.Model(&a).Update("refresh_token", uuidv4)
+	return c.Status(200).JSON(fiber.Map{"message": "success",
+		"access_token": token, "refresh_token": uuidv4})
 }
 
 func RegisterAdmin(c *fiber.Ctx) error {

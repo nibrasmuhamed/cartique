@@ -1,10 +1,11 @@
 package models
 
 type Admin struct {
-	Id       int    `gorm:"primaryKey" json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Id            int    `gorm:"primaryKey" json:"id"`
+	Username      string `json:"username"`
+	Email         string `json:"email"`
+	Password      string `json:"password"`
+	Refresh_token string `json:"refresh_token"`
 }
 
 type AdminLogin struct {

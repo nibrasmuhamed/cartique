@@ -129,6 +129,12 @@ func RefreshToken(c *fiber.Ctx) error {
 		db.Save(&u)
 		return c.Status(401).JSON(fiber.Map{"message": "your refresh token has been edited"})
 	}
+	d := util.CompareTime(u.UpdatedAt)
+	if d > 5 {
+		u.Refresh_token = ""
+		db.Save(&u)
+		return c.Status(401).JSON(fiber.Map{"message": "your refresh token has been expired"})
+	}
 	token, _ := util.GenerateJWT(int(id), "user")
 	uuidv4, _ := uuid.NewRandom()
 	db.Model(&u).Update("refresh_token", uuidv4)
