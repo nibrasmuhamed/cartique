@@ -19,7 +19,9 @@ func InitDB() {
 	}
 	db.AutoMigrate(models.User{})
 	db.AutoMigrate(models.Admin{})
-
+	db.AutoMigrate(models.Product{})
+	db.AutoMigrate(models.Category{})
+	db.AutoMigrate(models.Image{})
 	defer CloseDb(db)
 }
 
