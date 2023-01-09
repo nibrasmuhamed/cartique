@@ -9,7 +9,6 @@ import (
 	"github.com/nibrasmuhamed/cartique/database"
 	"github.com/nibrasmuhamed/cartique/models"
 	"github.com/nibrasmuhamed/cartique/util"
-	"gorm.io/gorm"
 )
 
 func RegisterUser(c *fiber.Ctx) error {
@@ -111,23 +110,22 @@ func VerifyUserOtp(c *fiber.Ctx) error {
 func ShowProducts(c *fiber.Ctx) error {
 	db := database.OpenDb()
 	defer database.CloseDb(db)
-	p := []models.ProductResp{}
+	p := []models.Product{}
 
-	err := db.Model(models.Product{}).Preload("Images", func(d *gorm.DB) *gorm.DB {
-		return d.Select("Photo")
-	}).Find(&p).Error
+	// err := db.Model(models.Product{}).Preload("Images").Find(&p).Error
+	err := db.Preload("Images").Find(&p)
 	if err != nil {
 		fmt.Println(err)
 	}
-	// pr := []models.ProductResp{}
-	// for _, q := range p {
-	// 	pq := models.ProductResp{Price: q.Price, Category_id: q.Category_id, ID: q.ID, Name: q.Name, Quantity: q.Quantity, Specs: q.Specs}
-	// 	for _, r := range q.Images {
-	// 		pq.Images = append(pq.Images, r.Photo)
-	// 	}
-	// 	pr = append(pr, pq)
-	// }
-	return c.Status(200).JSON(fiber.Map{"message": "success", "product": p})
+	pr := []models.ProductResp{}
+	for _, q := range p {
+		pq := models.ProductResp{Price: q.Price, Category_id: q.Category_id, ID: q.ID, Name: q.Name, Quantity: q.Quantity, Specs: q.Specs}
+		for _, r := range q.Images {
+			pq.Images = append(pq.Images, r.Photo)
+		}
+		pr = append(pr, pq)
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "success", "product": pr})
 }
 
 func RefreshToken(c *fiber.Ctx) error {

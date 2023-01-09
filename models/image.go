@@ -9,5 +9,5 @@ type Image struct {
 }
 
 type ImageRespose struct {
-	Photo []string `json:"image_link"`
+	Photo []Image `json:"image_link"`
 }

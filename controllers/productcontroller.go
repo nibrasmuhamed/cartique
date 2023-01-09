@@ -37,3 +37,12 @@ func AddProduct(c *fiber.Ctx) error {
 	db.Create(&p)
 	return c.Status(200).JSON(fiber.Map{"message": "success"})
 }
+
+func DeleteProduct(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	var p models.Product
+	db.Where("id = ?", id).Delete(&p)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}
