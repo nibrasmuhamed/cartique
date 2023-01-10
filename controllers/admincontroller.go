@@ -42,16 +42,16 @@ func BlockUsers(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{"message": "user blocked succesfully"})
 }
 
-func LoginAdmin(c *fiber.Ctx) error {
+func (r *UserController) LoginAdmin(c *fiber.Ctx) error {
 	a := new(models.AdminLogin)
 	var admindb models.Admin
 	if err := c.BodyParser(a); err != nil {
 		log.Println("error while parsing data: ", err)
 		return err
 	}
-	db := database.OpenDb()
-	defer database.CloseDb(db)
-	tx := db.Where("email = ?", a.Email).First(&admindb)
+	// db := database.OpenDb()
+	// defer database.CloseDb(db)
+	tx := r.DB.Where("email = ?", a.Email).First(&admindb)
 	if tx.Error == gorm.ErrRecordNotFound {
 		c.SendStatus(400)
 		return c.JSON(fiber.Map{"message": "no user found associated with this email"})

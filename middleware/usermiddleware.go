@@ -10,6 +10,7 @@ func UserMiddleware(c *fiber.Ctx) error {
 	if t == "" {
 		return c.Status(404).JSON(fiber.Map{"message": "token not found"})
 	}
+	// bearer
 	t = t[7:]
 	verified, _ := util.CheckToken(t)
 	if !verified {

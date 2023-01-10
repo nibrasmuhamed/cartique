@@ -9,7 +9,16 @@ import (
 	"github.com/nibrasmuhamed/cartique/database"
 	"github.com/nibrasmuhamed/cartique/models"
 	"github.com/nibrasmuhamed/cartique/util"
+	"gorm.io/gorm"
 )
+
+type UserController struct {
+	DB *gorm.DB
+}
+
+func NewUserController(DB *gorm.DB) *UserController {
+	return &UserController{DB}
+}
 
 func RegisterUser(c *fiber.Ctx) error {
 	u := new(models.UserRegister)
@@ -44,16 +53,17 @@ func RegisterUser(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "user created succesfully"})
 }
 
-func LoginUser(c *fiber.Ctx) error {
+func (r *UserController) LoginUser(c *fiber.Ctx) error {
 	var u models.UserLogin
 	if err := c.BodyParser(&u); err != nil {
 		c.SendStatus(500)
 		return c.JSON(fiber.Map{"message": "internal server error"})
 	}
-	db := database.OpenDb()
-	defer database.CloseDb(db)
+	// db := database.OpenDb()
+	// defer database.CloseDb(db)
 	user := models.User{}
-	db.Where("email = ?", u.Email).First(&user)
+	fmt.Println(r.DB)
+	r.DB.Where("email = ?", u.Email).First(&user)
 	if user.Email == "" {
 		c.SendStatus(400)
 		return c.JSON(fiber.Map{"message": "email or password is incorrect"})
@@ -70,7 +80,7 @@ func LoginUser(c *fiber.Ctx) error {
 		log.Println(err)
 	}
 	uuidv4, _ := uuid.NewRandom()
-	db.Model(&user).Update("refresh_token", uuidv4)
+	r.DB.Model(&user).Update("refresh_token", uuidv4)
 	res := models.UserResponse{Id: int(user.ID), Username: user.Username, Email: user.Email}
 	return c.Status(200).JSON(fiber.Map{"details": res, "message": "success", "access_token": token, "refresh_token": uuidv4})
 }
@@ -117,15 +127,15 @@ func ShowProducts(c *fiber.Ctx) error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	pr := []models.ProductResp{}
-	for _, q := range p {
-		pq := models.ProductResp{Price: q.Price, Category_id: q.Category_id, ID: q.ID, Name: q.Name, Quantity: q.Quantity, Specs: q.Specs}
-		for _, r := range q.Images {
-			pq.Images = append(pq.Images, r.Photo)
-		}
-		pr = append(pr, pq)
-	}
-	return c.Status(200).JSON(fiber.Map{"message": "success", "product": pr})
+	// pr := []models.ProductResp{}
+	// for _, q := range p {
+	// 	pq := models.ProductResp{Price: q.Price, Category_id: q.Category_id, ID: q.ID, Name: q.Name, Quantity: q.Quantity, Specs: q.Specs}
+	// 	for _, r := range q.Images {
+	// 		pq.Images = append(pq.Images, r.Photo)
+	// 	}
+	// 	pr = append(pr, pq)
+	// }
+	return c.Status(200).JSON(fiber.Map{"message": "success", "product": p})
 }
 
 func RefreshToken(c *fiber.Ctx) error {
