@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	TokenExpired = errors.New("token is expired")
-	UnknownError = errors.New("internal server error")
+	ErrTokenExpired = errors.New("token is expired")
+	ErrUnknownError = errors.New("internal server error")
 )
 
 func CheckToken(t string) (bool, error) {
@@ -26,14 +26,14 @@ func CheckToken(t string) (bool, error) {
 	})
 	if err != nil {
 		log.Println(err)
-		return false, TokenExpired
+		return false, ErrTokenExpired
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		if claims["role"] == "user" {
 			return true, nil
 		}
 	}
-	return false, UnknownError
+	return false, ErrUnknownError
 }
 
 func CheckTokenAdmin(t string) (bool, error) {
@@ -46,14 +46,14 @@ func CheckTokenAdmin(t string) (bool, error) {
 	})
 	if err != nil {
 		log.Println(err)
-		return false, TokenExpired
+		return false, ErrTokenExpired
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		if claims["role"] == "admin" {
 			return true, nil
 		}
 	}
-	return false, UnknownError
+	return false, ErrUnknownError
 }
 
 func GetidfromToken(t string) float64 {
