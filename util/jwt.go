@@ -20,7 +20,7 @@ func CheckToken(t string) (bool, error) {
 	key := []byte(os.Getenv("KEY"))
 	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error in parsing")
+			return nil, fmt.Errorf("there was an error in parsing")
 		}
 		return key, nil
 	})
@@ -40,7 +40,7 @@ func CheckTokenAdmin(t string) (bool, error) {
 	key := []byte(os.Getenv("KEY"))
 	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error in parsing")
+			return nil, fmt.Errorf("there was an error in parsing")
 		}
 		return key, nil
 	})
@@ -60,7 +60,7 @@ func GetidfromToken(t string) float64 {
 	key := []byte(os.Getenv("KEY"))
 	token, err := jwt.Parse(t, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error in parsing")
+			return nil, fmt.Errorf("there was an error in parsing")
 		}
 		return key, nil
 	})
