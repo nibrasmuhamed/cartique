@@ -20,12 +20,12 @@ type Category struct {
 	Status        bool      `json:"status"`
 }
 
-type ProductResp struct {
+type ProductRespHome struct {
 	ID          uint     `gorm:"primarykey" json:"id"`
-	Images      []string `json:"image_id"`
+	Images      []string `json:"image_id" gorm:"column:photo"`
 	Category_id int      `json:"category_id" `
 	Name        string   `json:"name"`
 	Price       int      `json:"price"`
-	Quantity    int      `json:"quantity"`
-	Specs       string   `json:"specs"`
+	// Quantity    int      `json:"quantity"`
+	// Specs       string   `json:"specs"`
 }

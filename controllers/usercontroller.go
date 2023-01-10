@@ -63,7 +63,11 @@ func (r *UserController) LoginUser(c *fiber.Ctx) error {
 	// defer database.CloseDb(db)
 	user := models.User{}
 	fmt.Println(r.DB)
-	r.DB.Where("email = ?", u.Email).First(&user)
+	err := r.DB.Where("email = ?", u.Email).First(&user).Error
+	if err != nil {
+		fmt.Println("error is ", err)
+		return c.Status(500).JSON(fiber.Map{"message": "internal server error"})
+	}
 	if user.Email == "" {
 		c.SendStatus(400)
 		return c.JSON(fiber.Map{"message": "email or password is incorrect"})
@@ -118,23 +122,36 @@ func VerifyUserOtp(c *fiber.Ctx) error {
 }
 
 func ShowProducts(c *fiber.Ctx) error {
-	db := database.OpenDb()
-	defer database.CloseDb(db)
-	p := []models.Product{}
+	db := database.OpenDataBase()
+	defer database.CloseDatabase(db)
+	p := []models.ProductRespHome{}
 
-	// err := db.Model(models.Product{}).Preload("Images").Find(&p).Error
-	err := db.Preload("Images").Find(&p)
+	r, err := db.Query("SELECT id, name, price, category_id from products where products.deleted_at is null")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error is :", err)
+		return c.Status(500).JSON(fiber.Map{"message": "internal server error"})
 	}
-	// pr := []models.ProductResp{}
-	// for _, q := range p {
-	// 	pq := models.ProductResp{Price: q.Price, Category_id: q.Category_id, ID: q.ID, Name: q.Name, Quantity: q.Quantity, Specs: q.Specs}
-	// 	for _, r := range q.Images {
-	// 		pq.Images = append(pq.Images, r.Photo)
-	// 	}
-	// 	pr = append(pr, pq)
-	// }
+	defer r.Close()
+	for r.Next() {
+		a := models.ProductRespHome{}
+		err = r.Scan(&a.ID, &a.Name, &a.Price, &a.Category_id)
+		if err != nil {
+			fmt.Println("error while scanning ", err)
+		}
+		i, err := db.Query("SELECT photo FROM images WHERE images.product_id=?", a.ID)
+		if err != nil {
+			fmt.Println("2nd errror is:", err)
+		}
+		for i.Next() {
+			var x string
+			err = i.Scan(&x)
+			if err != nil {
+				fmt.Println(err)
+			}
+			a.Images = append(a.Images, x)
+		}
+		p = append(p, a)
+	}
 	return c.Status(200).JSON(fiber.Map{"message": "success", "product": p})
 }
 

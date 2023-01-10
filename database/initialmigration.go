@@ -1,11 +1,13 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/nibrasmuhamed/cartique/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -17,13 +19,11 @@ func InitDB() *gorm.DB {
 	if err != nil {
 		log.Println("error in connecting database : ", err)
 	}
-	// DB.AutoMigrate(models.User{})
-	// DB.AutoMigrate(models.Admin{})
-	// DB.AutoMigrate(models.Product{})
-	// DB.AutoMigrate(models.Category{})
-	// DB.AutoMigrate(models.Image{})
-	// defer CloseDb(DB)
-	fmt.Println("di  bi iss................", DB)
+	DB.AutoMigrate(models.User{})
+	DB.AutoMigrate(models.Admin{})
+	DB.AutoMigrate(models.Product{})
+	DB.AutoMigrate(models.Category{})
+	DB.AutoMigrate(models.Image{})
 	return DB
 }
 
@@ -38,4 +38,16 @@ func OpenDb() *gorm.DB {
 		log.Println("error in connecting database : ", err)
 	}
 	return db
+}
+
+func OpenDataBase() *sql.DB {
+	db, err := sql.Open("mysql", os.Getenv("DB"))
+	if err != nil {
+		fmt.Println("error is :", err)
+	}
+	return db
+}
+
+func CloseDatabase(d *sql.DB) {
+	d.Close()
 }
