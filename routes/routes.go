@@ -15,13 +15,11 @@ func NewUserRouter(uc *controllers.UserController) *UserRouter {
 }
 
 func (u *UserRouter) Routes(user fiber.Router) {
-	user.Post("/register", controllers.RegisterUser)
+	user.Post("/register", u.UserRoute.RegisterUser)
 	user.Post("/login", u.UserRoute.LoginUser)
-	user.Get("/verify", middleware.UserMiddleware, controllers.VerifyUser)
-	user.Get("/verify/:id", middleware.UserMiddleware, controllers.VerifyUserOtp)
-	user.Get("/refresh", controllers.RefreshToken)
-	user.Get("/logout", controllers.Logout)
-	user.Get("/", controllers.ShowProducts)
-
-	// return app
+	user.Get("/verify", middleware.UserMiddleware, u.UserRoute.VerifyUser)
+	user.Get("/verify/:id", middleware.UserMiddleware, u.UserRoute.VerifyUserOtp)
+	user.Get("/refresh", u.UserRoute.RefreshToken)
+	user.Get("/logout", u.UserRoute.Logout)
+	user.Get("/", u.UserRoute.ShowProducts)
 }

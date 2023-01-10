@@ -6,52 +6,53 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	uuid "github.com/google/UUID"
-	"github.com/nibrasmuhamed/cartique/database"
 	"github.com/nibrasmuhamed/cartique/models"
 	"github.com/nibrasmuhamed/cartique/util"
 	"gorm.io/gorm"
 )
 
-func UnBlockUsers(c *fiber.Ctx) error {
+type AdminController struct {
+	DB *gorm.DB
+}
+
+func NewAdminController(DB *gorm.DB) *AdminController {
+	return &AdminController{DB}
+}
+
+func (ac *AdminController) UnBlockUsers(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
-	db := database.OpenDb()
-	defer database.CloseDb(db)
 	var u models.User
-	db.Where("id = ?", id).First(&u)
+	ac.DB.Where("id = ?", id).First(&u)
 	if u.Email == "" {
 		return c.Status(404).JSON(fiber.Map{"message": "cannot find the user"})
 	}
 	u.Blocked = false
 	u.Refresh_token = ""
-	db.Save(&u)
+	ac.DB.Save(&u)
 	return c.Status(200).JSON(fiber.Map{"message": "user unblocked succesfully"})
 }
 
-func BlockUsers(c *fiber.Ctx) error {
+func (ac *AdminController) BlockUsers(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
-	db := database.OpenDb()
-	defer database.CloseDb(db)
 	var u models.User
-	db.Where("id = ?", id).First(&u)
+	ac.DB.Where("id = ?", id).First(&u)
 	if u.Email == "" {
 		return c.Status(404).JSON(fiber.Map{"message": "cannot find the user"})
 	}
 	u.Blocked = true
 	u.Refresh_token = ""
-	db.Save(&u)
+	ac.DB.Save(&u)
 	return c.Status(200).JSON(fiber.Map{"message": "user blocked succesfully"})
 }
 
-func (r *UserController) LoginAdmin(c *fiber.Ctx) error {
+func (ac *AdminController) LoginAdmin(c *fiber.Ctx) error {
 	a := new(models.AdminLogin)
 	var admindb models.Admin
 	if err := c.BodyParser(a); err != nil {
 		log.Println("error while parsing data: ", err)
 		return err
 	}
-	// db := database.OpenDb()
-	// defer database.CloseDb(db)
-	tx := r.DB.Where("email = ?", a.Email).First(&admindb)
+	tx := ac.DB.Where("email = ?", a.Email).First(&admindb)
 	if tx.Error == gorm.ErrRecordNotFound {
 		c.SendStatus(400)
 		return c.JSON(fiber.Map{"message": "no user found associated with this email"})
@@ -69,7 +70,7 @@ func (r *UserController) LoginAdmin(c *fiber.Ctx) error {
 		"access_token": token})
 }
 
-func Refresh_token_admin(c *fiber.Ctx) error {
+func (ac *AdminController) RefressTokenAdmin(c *fiber.Ctx) error {
 
 	t := c.Get("Authorization")
 	r := c.Get("refresh_token")
@@ -78,29 +79,27 @@ func Refresh_token_admin(c *fiber.Ctx) error {
 	}
 	t = t[7:]
 	var a models.Admin
-	db := database.OpenDb()
-	defer database.CloseDb(db)
 	verified, _ := util.CheckToken(t)
 	if !verified {
 		a.Refresh_token = ""
-		db.Save(&a)
+		ac.DB.Save(&a)
 		return c.Status(401).JSON(fiber.Map{"message": "user not authorized"})
 	}
 	id := int(util.GetidfromToken(string(t)))
-	db.Where("id = ?", id).First(&a)
+	ac.DB.Where("id = ?", id).First(&a)
 	if r != a.Refresh_token {
 		a.Refresh_token = ""
-		db.Save(&a)
+		ac.DB.Save(&a)
 		return c.Status(401).JSON(fiber.Map{"message": "your refresh token has been edited"})
 	}
 	token, _ := util.GenerateJWT(int(id), "admin", 5)
 	uuidv4, _ := uuid.NewRandom()
-	db.Model(&a).Update("refresh_token", uuidv4)
+	ac.DB.Model(&a).Update("refresh_token", uuidv4)
 	return c.Status(200).JSON(fiber.Map{"message": "success",
 		"access_token": token, "refresh_token": uuidv4})
 }
 
-func RegisterAdmin(c *fiber.Ctx) error {
+func (ac *AdminController) RegisterAdmin(c *fiber.Ctx) error {
 	a := new(models.AdminRegister)
 	adb := new(models.Admin)
 	// parsing body in to the admin register struct.
@@ -113,27 +112,23 @@ func RegisterAdmin(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"message": "password is not strong"})
 	}
 	// database opening and defering close
-	db := database.OpenDb()
-	defer database.CloseDb(db)
 	// checking whether an admin exist with this email or not
-	tx := db.Where("email = ?", a.Email).First(&adb)
+	tx := ac.DB.Where("email = ?", a.Email).First(&adb)
 	if tx.Error != gorm.ErrRecordNotFound {
 		c.SendStatus(400)
 		return c.JSON(fiber.Map{"message": "admin with this email already exist"})
 	}
 	u := models.Admin{Username: a.Username, Email: a.Email, Password: util.HashPassword(a.Password)}
-	db.Create(&u)
+	ac.DB.Create(&u)
 	c.SendStatus(200)
 	return c.JSON(fiber.Map{"message": "success"})
 }
 
-func ViewUsers(c *fiber.Ctx) error {
+func (ac *AdminController) ViewUsers(c *fiber.Ctx) error {
 	l, _ := strconv.Atoi(c.Query("limit"))
 	o, _ := strconv.Atoi(c.Query("offset"))
 
 	var users []models.UserResponse
-	db := database.OpenDb()
-	defer database.CloseDb(db)
-	db.Model(models.User{}).Limit(l).Offset(o).Find(&users)
+	ac.DB.Model(models.User{}).Limit(l).Offset(o).Find(&users)
 	return c.Status(200).JSON(fiber.Map{"message": "success", "users": users})
 }
