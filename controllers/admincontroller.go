@@ -19,6 +19,19 @@ func NewAdminController(DB *gorm.DB) *AdminController {
 	return &AdminController{DB}
 }
 
+func (ac *AdminController) EditUser(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	var u models.User
+	ac.DB.Where("id = ?", id).First(&u)
+	if u.Email == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "cannot find the user"})
+	}
+	u.Blocked = true
+	u.Refresh_token = ""
+	ac.DB.Save(&u)
+	return c.Status(200).JSON(fiber.Map{"message": "user blocked succesfully"})
+}
+
 func (ac *AdminController) UnBlockUsers(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	var u models.User

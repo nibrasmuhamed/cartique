@@ -6,7 +6,7 @@ type Product struct {
 	gorm.Model
 	Images      []Image `json:"image_id"`
 	Category_id int     `json:"category_id" `
-	Name        string  `json:"name"`
+	Name        string  `json:"name" gorm:"unique;not null"`
 	Price       int     `json:"price"`
 	Quantity    int     `json:"quantity"`
 	Specs       string  `json:"specs"`

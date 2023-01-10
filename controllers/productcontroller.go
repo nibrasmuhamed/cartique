@@ -19,10 +19,10 @@ func AddProduct(c *fiber.Ctx) error {
 	p.Specs = c.FormValue("spec")
 	p.Name = c.FormValue("name")
 	form, _ := c.MultipartForm()
-	file := form.File["images"]
 	if check := util.CheckFiles(p); !check {
 		return c.Status(400).JSON(fiber.Map{"message": "required fields are empty"})
 	}
+	file := form.File["images"]
 	if len(file) < 3 {
 		return c.Status(400).JSON(fiber.Map{"message": "please upload atleast three images"})
 	}
@@ -33,8 +33,13 @@ func AddProduct(c *fiber.Ctx) error {
 		c.SaveFile(fileHeader, fmt.Sprintf("./public/images/%s", x+".jpg"))
 		u := models.Image{Product_id: p.ID, Photo: c.BaseURL() + "/images/" + x + ".jpg"}
 		p.Images = append(p.Images, u)
+		db.Create(&p.Images)
 	}
-	db.Create(&p)
+	tx := db.Create(&p)
+	if tx.Error != nil {
+		fmt.Println(tx.Error)
+		return c.Status(500).JSON(fiber.Map{"message": "cannot process the request now"})
+	}
 	return c.Status(200).JSON(fiber.Map{"message": "success"})
 }
 
@@ -44,5 +49,44 @@ func DeleteProduct(c *fiber.Ctx) error {
 	defer database.CloseDb(db)
 	var p models.Product
 	db.Where("id = ?", id).Delete(&p)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}
+
+func EditProduct(c *fiber.Ctx) error {
+	p, img := models.Product{}, models.Image{Product_id: 0}
+	db := database.OpenDb()
+	defer database.CloseDb(db)
+	db.First(&p, "id = ?", c.Params("id"))
+	tx := db.Where("product_id = ?", c.Params("id")).Unscoped().Delete(&img)
+	if tx.Error != nil {
+		fmt.Println("txerr", tx.Error)
+	}
+	p.Category_id, _ = strconv.Atoi(c.FormValue("category_id"))
+	p.Price, _ = strconv.Atoi(c.FormValue("price"))
+	p.Quantity, _ = strconv.Atoi(c.FormValue("quantity"))
+	p.Specs = c.FormValue("spec")
+	p.Name = c.FormValue("name")
+	form, _ := c.MultipartForm()
+
+	if check := util.CheckFiles(p); !check {
+		return c.Status(400).JSON(fiber.Map{"message": "required fields are empty"})
+	}
+	file := form.File["images"]
+	if len(file) < 3 {
+		return c.Status(400).JSON(fiber.Map{"message": "please upload atleast three images"})
+	}
+
+	for _, fileHeader := range file {
+		x := uuid.New().String()
+		c.SaveFile(fileHeader, fmt.Sprintf("./public/images/%s", x+".jpg"))
+		u := models.Image{Product_id: p.ID, Photo: c.BaseURL() + "/images/" + x + ".jpg"}
+		p.Images = append(p.Images, u)
+		db.Save(&p.Images)
+	}
+	tx = db.Save(&p)
+	if tx.Error != nil {
+		fmt.Println(tx.Error)
+		return c.Status(500).JSON(fiber.Map{"message": "cannot process the request now"})
+	}
 	return c.Status(200).JSON(fiber.Map{"message": "success"})
 }

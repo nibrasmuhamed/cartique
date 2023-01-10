@@ -22,4 +22,7 @@ func (u *UserRouter) Routes(user fiber.Router) {
 	user.Get("/refresh", u.UserRoute.RefreshToken)
 	user.Get("/logout", u.UserRoute.Logout)
 	user.Get("/", u.UserRoute.ShowProducts)
+	user.Get("/addtocart/:id", u.UserRoute.AddToCart)
+	user.Get("/showcart", u.UserRoute.ShowCart)
+
 }

@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	uuid "github.com/google/UUID"
@@ -76,7 +77,7 @@ func (uc *UserController) LoginUser(c *fiber.Ctx) error {
 	if user.Blocked {
 		return c.Status(400).JSON(fiber.Map{"message": "your account is suspended by cartique"})
 	}
-	token, err := util.GenerateJWT(int(user.ID), "user", 5)
+	token, err := util.GenerateJWT(int(user.ID), "user", 100000)
 	if err != nil {
 		log.Println(err)
 	}
@@ -197,4 +198,49 @@ func (uc *UserController) Logout(c *fiber.Ctx) error {
 	}
 	return c.Status(200).JSON(fiber.Map{"message": "logged out",
 		"access_token": t})
+}
+
+func (uc *UserController) AddToCart(c *fiber.Ctx) error {
+	productID, _ := strconv.Atoi(c.Params("id"))
+	t := c.Get("Authorization")
+	if t == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "access token or refresh token not found"})
+	}
+	t = t[7:]
+	userID := util.GetidfromToken(t)
+	var cart models.Cart
+	tx := uc.DB.Where("product_id=? AND user_id=?", productID, userID).First(&cart)
+	if tx.Error != gorm.ErrRecordNotFound {
+		cart.Quantity += 1
+		uc.DB.Save(&cart)
+		return c.Status(200).JSON(fiber.Map{"message": "success"})
+	}
+	cart = models.Cart{ProductID: uint(productID), UserID: uint(userID), Quantity: 1}
+	uc.DB.Create(&cart)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}
+
+func (uc *UserController) ShowCart(c *fiber.Ctx) error {
+	t := c.Get("Authorization")
+	if t == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "access token or refresh token not found"})
+	}
+	t = t[7:]
+	userID := util.GetidfromToken(t)
+	db := database.OpenDataBase()
+	defer database.CloseDatabase(db)
+	prods := []int{}
+	rows, err := db.Query("SELECT product_id FROM carts WHERE user_id=?", userID)
+	if err != nil {
+		fmt.Println("error is :", err)
+	}
+	for rows.Next() {
+		var x int
+		rows.Scan(&x)
+		prods = append(prods, x)
+	}
+	x := util.FindProducts(prods)
+	return c.Status(200).JSON(fiber.Map{"message": "success",
+		"products": x})
+
 }
