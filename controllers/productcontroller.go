@@ -154,3 +154,21 @@ func (pd *AdminController) EditProduct(c *fiber.Ctx) error {
 	}
 	return c.Status(200).JSON(fiber.Map{"message": "success"})
 }
+
+func (uc *AdminController) Logout(c *fiber.Ctx) error {
+	t, _, err := util.GetAuthRef(c)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"message": "user token not found"})
+	}
+	id := util.GetidfromToken(t)
+	var u models.Admin
+	uc.DB.Where("id = ?", id).First(&u)
+	u.Refresh_token = ""
+	uc.DB.Save(&u)
+	t, err = util.GenerateJWT(int(id), "admin", 0)
+	if err != nil {
+		fmt.Println("something")
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "logged out",
+		"access_token": t})
+}

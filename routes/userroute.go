@@ -25,8 +25,13 @@ func (u *UserRouter) Routes(user fiber.Router) {
 	user.Put("/edit", middleware.UserMiddleware, u.UserRoute.EditUser)
 
 	user.Get("/addtocart/:id", u.UserRoute.AddToCart)
+	user.Get("/removefromcart/:id", u.UserRoute.RemoveFromCart)
 	user.Get("/showcart", u.UserRoute.ShowCart)
 	user.Post("/add_address", middleware.UserMiddleware, u.UserRoute.AddAddress)
 	user.Get("/show_address", middleware.UserMiddleware, u.UserRoute.ShowAddress)
+
+	user.Get("/addtowishlist/:id", u.UserRoute.AddToWishlist)
+	user.Get("/showwishlist", u.UserRoute.Showwishlist)
+	user.Get("/removewishlist/:id", u.UserRoute.RemoveFromWishList)
 
 }

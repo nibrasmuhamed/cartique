@@ -296,3 +296,76 @@ func (uc *UserController) EditUser(c *fiber.Ctx) error {
 	uc.DB.Save(&udb)
 	return c.Status(200).JSON(fiber.Map{"message": "success"})
 }
+
+func (uc *UserController) Showwishlist(c *fiber.Ctx) error {
+	t := c.Get("Authorization")
+	t = t[7:]
+	userID := util.GetidfromToken(t)
+	db := database.OpenDataBase()
+	defer database.CloseDatabase(db)
+	prods := []int{}
+	rows, err := db.Query("SELECT product_id FROM wishlists WHERE user_id=?", userID)
+	defer func() {
+		if err := rows.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	if err != nil {
+		fmt.Println("error is :", err)
+	}
+	for rows.Next() {
+		var x int
+		rows.Scan(&x)
+		prods = append(prods, x)
+	}
+	x := util.FindProducts(prods)
+	return c.Status(200).JSON(fiber.Map{"message": "success",
+		"products": x})
+
+}
+
+func (uc *UserController) AddToWishlist(c *fiber.Ctx) error {
+	productID, _ := strconv.Atoi(c.Params("id"))
+	t := c.Get("Authorization")
+	if t == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "access token or refresh token not found"})
+	}
+	t = t[7:]
+	userID := util.GetidfromToken(t)
+	var cart models.Wishlist
+	tx := uc.DB.Where("product_id=? AND user_id=?", productID, userID).First(&cart)
+	if tx.Error != gorm.ErrRecordNotFound {
+		cart.Quantity += 1
+		uc.DB.Save(&cart)
+		return c.Status(200).JSON(fiber.Map{"message": "success"})
+	}
+	cart = models.Wishlist{ProductID: uint(productID), UserID: uint(userID), Quantity: 1}
+	uc.DB.Create(&cart)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}
+
+func (uc *UserController) RemoveFromWishList(c *fiber.Ctx) error {
+	productID, _ := strconv.Atoi(c.Params("id"))
+	t := c.Get("Authorization")
+	if t == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "access token or refresh token not found"})
+	}
+	t = t[7:]
+	userID := util.GetidfromToken(t)
+	var cart models.Wishlist
+	uc.DB.Where("product_id=? AND user_id=?", productID, userID).Delete(&cart)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}
+
+func (uc *UserController) RemoveFromCart(c *fiber.Ctx) error {
+	productID, _ := strconv.Atoi(c.Params("id"))
+	t := c.Get("Authorization")
+	if t == "" {
+		return c.Status(404).JSON(fiber.Map{"message": "access token or refresh token not found"})
+	}
+	t = t[7:]
+	userID := util.GetidfromToken(t)
+	var cart models.Cart
+	uc.DB.Where("product_id=? AND user_id=?", productID, userID).Delete(&cart)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}

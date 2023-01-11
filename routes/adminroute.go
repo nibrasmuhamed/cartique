@@ -18,6 +18,7 @@ func (ar *AdminRouter) AdminRoute(admin fiber.Router) {
 	admin.Post("/register", ar.AR.RegisterAdmin)
 	admin.Post("/login", ar.AR.LoginAdmin)
 	admin.Get("/refresh", ar.AR.RefressTokenAdmin)
+	admin.Get("/logout", ar.AR.Logout)
 
 	userManagment := admin.Group("user_managment")
 	userManagment.Get("/", middleware.AdminMiddleware, ar.AR.ViewUsers)
