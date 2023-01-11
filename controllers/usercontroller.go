@@ -222,15 +222,17 @@ func (uc *UserController) AddToCart(c *fiber.Ctx) error {
 
 func (uc *UserController) ShowCart(c *fiber.Ctx) error {
 	t := c.Get("Authorization")
-	if t == "" {
-		return c.Status(404).JSON(fiber.Map{"message": "access token or refresh token not found"})
-	}
 	t = t[7:]
 	userID := util.GetidfromToken(t)
 	db := database.OpenDataBase()
 	defer database.CloseDatabase(db)
 	prods := []int{}
 	rows, err := db.Query("SELECT product_id FROM carts WHERE user_id=?", userID)
+	defer func() {
+		if err := rows.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
 	if err != nil {
 		fmt.Println("error is :", err)
 	}
@@ -243,4 +245,37 @@ func (uc *UserController) ShowCart(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{"message": "success",
 		"products": x})
 
+}
+
+func (uc *UserController) AddAddress(c *fiber.Ctx) error {
+	userId := int(c.Locals("userid").(float64))
+	ad := models.Address{}
+	if err := c.BodyParser(&ad); err != nil {
+		fmt.Println(err)
+		return util.InternalServerErr(c)
+	}
+	ad.UserID = uint(userId)
+	uc.DB.Create(&ad)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}
+
+func (uc *UserController) ShowAddress(c *fiber.Ctx) error {
+	userId := int(c.Locals("userid").(float64))
+	db := database.OpenDataBase()
+	defer database.CloseDatabase(db)
+	ads := []models.AddressResp{}
+	rows, err := db.Query("SELECT id, user_id, home,city, disctrict,state, pin FROM addresses WHERE user_id=?", userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for rows.Next() {
+		var ad models.AddressResp
+		if err := rows.Scan(&ad.ID, &ad.UserID, &ad.Home, &ad.City, &ad.District, &ad.State, &ad.Pin); err != nil {
+			fmt.Println(err)
+		}
+		ads = append(ads, ad)
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "success",
+		"addresses": ads,
+	})
 }

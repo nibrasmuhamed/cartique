@@ -25,6 +25,8 @@ func InitDB() *gorm.DB {
 	DB.AutoMigrate(models.Category{})
 	DB.AutoMigrate(models.Image{})
 	DB.AutoMigrate(models.Cart{})
+	DB.AutoMigrate(models.Address{})
+
 	return DB
 }
 

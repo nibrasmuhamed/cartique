@@ -24,5 +24,7 @@ func (u *UserRouter) Routes(user fiber.Router) {
 	user.Get("/", u.UserRoute.ShowProducts)
 	user.Get("/addtocart/:id", u.UserRoute.AddToCart)
 	user.Get("/showcart", u.UserRoute.ShowCart)
+	user.Post("/add_address", middleware.UserMiddleware, u.UserRoute.AddAddress)
+	user.Get("/show_address", middleware.UserMiddleware, u.UserRoute.ShowAddress)
 
 }
