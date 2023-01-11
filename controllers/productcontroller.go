@@ -20,6 +20,32 @@ func NewProductDB(p *gorm.DB) *ProductDB {
 	return &ProductDB{p}
 }
 
+func (Pd *ProductDB) ShowAProduct(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.OpenDataBase()
+	defer database.CloseDatabase(db)
+	r := db.QueryRow("SELECT id, name, price, category_id,quantity, specs from products where products.deleted_at is null AND id=?", id)
+	a := models.ProductResp{}
+	err := r.Scan(&a.ID, &a.Name, &a.Price, &a.Category_id, &a.Quantity, &a.Specs)
+	if err != nil {
+		fmt.Println("error while scanning ", err)
+		return c.Status(400).JSON(fiber.Map{"message": "product id doesn't exist"})
+	}
+	i, err := db.Query("SELECT photo FROM images WHERE images.product_id=?", a.ID)
+	if err != nil {
+		fmt.Println("2nd errror is:", err)
+	}
+	for i.Next() {
+		var x string
+		err = i.Scan(&x)
+		if err != nil {
+			fmt.Println(err)
+		}
+		a.Images = append(a.Images, x)
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "success", "product": a})
+}
+
 func (Pd *ProductDB) ShowProducts(c *fiber.Ctx) error {
 	db := database.OpenDataBase()
 	defer database.CloseDatabase(db)

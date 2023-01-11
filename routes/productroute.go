@@ -15,4 +15,6 @@ func NewProductRoter(p *controllers.ProductDB) *ProductRouter {
 
 func (pr *ProductRouter) Routes(p fiber.Router) {
 	p.Get("/", pr.pr.ShowProducts)
+	p.Get("/:id", pr.pr.ShowAProduct)
+
 }

@@ -281,3 +281,18 @@ func (uc *UserController) ShowAddress(c *fiber.Ctx) error {
 		"addresses": ads,
 	})
 }
+
+func (uc *UserController) EditUser(c *fiber.Ctx) error {
+	userId := int(c.Locals("userid").(float64))
+	var u, udb models.User
+	if err := c.BodyParser(&u); err != nil {
+		fmt.Println(err)
+	}
+	uc.DB.First(&udb, userId)
+	udb.Email = u.Email
+	udb.Phone = u.Phone
+	udb.Username = u.Username
+	fmt.Println(udb)
+	uc.DB.Save(&udb)
+	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}

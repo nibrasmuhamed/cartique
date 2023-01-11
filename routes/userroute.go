@@ -22,6 +22,8 @@ func (u *UserRouter) Routes(user fiber.Router) {
 	user.Get("/refresh", u.UserRoute.RefreshToken)
 	user.Get("/logout", u.UserRoute.Logout)
 	user.Get("/", u.UserRoute.ShowProducts)
+	user.Put("/edit", middleware.UserMiddleware, u.UserRoute.EditUser)
+
 	user.Get("/addtocart/:id", u.UserRoute.AddToCart)
 	user.Get("/showcart", u.UserRoute.ShowCart)
 	user.Post("/add_address", middleware.UserMiddleware, u.UserRoute.AddAddress)
