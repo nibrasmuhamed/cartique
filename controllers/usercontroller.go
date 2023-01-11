@@ -119,6 +119,8 @@ func (uc *UserController) ShowProducts(c *fiber.Ctx) error {
 	db := database.OpenDataBase()
 	defer database.CloseDatabase(db)
 	p := []models.ProductRespHome{}
+	// uc.DB.Model(models.Product{}).Preload("Images", "photo is not null").Select("images.photo").Find(&p)
+
 	r, err := db.Query("SELECT id, name, price, category_id from products where products.deleted_at is null")
 	if err != nil {
 		fmt.Println("error is :", err)

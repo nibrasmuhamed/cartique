@@ -25,9 +25,9 @@ func (ar *AdminRouter) AdminRoute(admin fiber.Router) {
 	userManagment.Get("/edit/:id", middleware.AdminMiddleware, ar.AR.EditUser)
 	userManagment.Get("/unblock/:id", middleware.AdminMiddleware, ar.AR.UnBlockUsers)
 	product := admin.Group("/products")
-	product.Post("/add_category", controllers.AddCategory)
-	product.Post("/add_product", controllers.AddProduct)
-	product.Post("/delete_product/:id", controllers.DeleteProduct)
-	product.Post("/edit_product/:id", controllers.EditProduct)
+	product.Post("/add_category", ar.AR.AddCategory)
+	product.Post("/add_product", ar.AR.AddProduct)
+	product.Post("/delete_product/:id", ar.AR.DeleteProduct)
+	product.Post("/edit_product/:id", ar.AR.EditProduct)
 
 }

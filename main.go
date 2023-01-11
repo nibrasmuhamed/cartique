@@ -15,14 +15,18 @@ var (
 	AC *controllers.AdminController
 	ar *routes.AdminRouter
 	ur *routes.UserRouter
+	Pc *controllers.ProductDB
+	Pr *routes.ProductRouter
 )
 
 func init() {
 	x := database.InitDB()
 	AC = controllers.NewAdminController(x)
 	UC = controllers.NewUserController(x)
+	Pc = controllers.NewProductDB(x)
 	ur = routes.NewUserRouter(UC)
 	ar = routes.NewAdminRouter(*AC)
+	Pr = routes.NewProductRoter(Pc)
 }
 
 func main() {
@@ -33,6 +37,8 @@ func main() {
 	app.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
+	products := app.Group("/products")
+	Pr.Routes(products)
 	admin := app.Group("/admin")
 	ar.AdminRoute(admin)
 	user := app.Group("/user")
