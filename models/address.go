@@ -6,7 +6,7 @@ type Address struct {
 	gorm.Model
 	// foreign key of user
 	UserID   uint
-	User     User   `gorm:"foreignKey:ID"`
+	User     User   // `gorm:"foreignKey:ID"`
 	Home     string `json:"home"`
 	City     string `json:"city"`
 	District string `json:"district"`

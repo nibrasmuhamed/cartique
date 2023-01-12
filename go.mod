@@ -4,9 +4,11 @@ go 1.19
 
 require (
 	github.com/gofiber/fiber/v2 v2.41.0
+	github.com/gofiber/utils v1.0.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/UUID v1.0.0
 	github.com/joho/godotenv v1.4.0
+	github.com/stripe/stripe-go/v74 v74.5.0
 	github.com/twilio/twilio-go v1.3.0
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	gorm.io/driver/mysql v1.4.5

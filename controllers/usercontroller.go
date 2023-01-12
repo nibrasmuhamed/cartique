@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,15 +11,91 @@ import (
 	"github.com/nibrasmuhamed/cartique/database"
 	"github.com/nibrasmuhamed/cartique/models"
 	"github.com/nibrasmuhamed/cartique/util"
+	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v74/checkout/session"
 	"gorm.io/gorm"
 )
 
+type UserControllerInterface interface {
+	NewUserController(DB *gorm.DB) *UserController
+}
 type UserController struct {
 	DB *gorm.DB
 }
 
 func NewUserController(DB *gorm.DB) *UserController {
 	return &UserController{DB}
+}
+
+func (uc *UserController) CheckOut(c *fiber.Ctx) error {
+	userID := int(c.Locals("userid").(float64))
+	aID, _ := strconv.Atoi(c.Params("id"))
+	db := database.OpenDataBase()
+	defer database.CloseDatabase(db)
+	err := uc.DB.Model(&models.Address{}).Where("id=?", aID).First(&models.Address{}).Error
+	if err == gorm.ErrRecordNotFound {
+		fmt.Println(err)
+		return c.Status(400).JSON(fiber.Map{"message": "address not found"})
+	}
+	prods := []int{}
+	total := 0
+	rows, err := db.Query("SELECT product_id,quantity FROM carts WHERE user_id=?", userID)
+	defer func() {
+		if err := rows.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	if err != nil {
+		fmt.Println("error is :", err)
+	}
+	quantity := []int{}
+	for rows.Next() {
+		var x, q int
+		rows.Scan(&x, &q)
+		quantity = append(quantity, q)
+		prods = append(prods, x)
+	}
+	x := util.FindProducts(prods)
+	for q, v := range x {
+		total += v.Price * quantity[q]
+	}
+	var orders []models.OrderResp
+	for i, prod := range x {
+		order := models.Order{ProductID: prod.ID, UserID: uint(userID), Status: "pending",
+			AddressID: uint(aID), Quantity: quantity[i], Price: prod.Price}
+		uc.DB.Create(&order)
+		orderResp := models.OrderResp{ProductID: prod.ID, Quantity: quantity[i], Price: prod.Price, Status: "pending"}
+		orders = append(orders, orderResp)
+	}
+	stripe.Key = os.Getenv("SK_TEST_KEY")
+	params := &stripe.CheckoutSessionParams{
+		Mode: stripe.String(string(stripe.CheckoutSessionModePayment)),
+		LineItems: []*stripe.CheckoutSessionLineItemParams{
+			&stripe.CheckoutSessionLineItemParams{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency: stripe.String("inr"),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+						Name: stripe.String("thing"),
+					},
+					UnitAmount: stripe.Int64(int64(total * 100)),
+				},
+				Quantity: stripe.Int64(1),
+			},
+		},
+		SuccessURL: stripe.String("http://localhost:8000/images/success.html"),
+		CancelURL:  stripe.String("http://localhost:8000/images/cancel.html"),
+	}
+
+	s, err := session.New(params)
+
+	if err != nil {
+		log.Printf("session.New: %v", err)
+	}
+	return c.Status(200).JSON(fiber.Map{"message": "success",
+		"products": orders,
+		"total":    total,
+		"url":      s.URL,
+	})
 }
 
 func (uc *UserController) RegisterUser(c *fiber.Ctx) error {
@@ -53,6 +130,7 @@ func (uc *UserController) RegisterUser(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) LoginUser(c *fiber.Ctx) error {
+	c.Set("Content-Type", "application/json")
 	var u models.UserLogin
 	if err := c.BodyParser(&u); err != nil {
 		c.SendStatus(500)
