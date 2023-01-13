@@ -145,3 +145,11 @@ func (ac *AdminController) ViewUsers(c *fiber.Ctx) error {
 	ac.DB.Model(models.User{}).Limit(l).Offset(o).Find(&users)
 	return c.Status(200).JSON(fiber.Map{"message": "success", "users": users})
 }
+
+func (ac *AdminController) ViewOrders(c *fiber.Ctx) error {
+	var o []models.OrderRespAdmin
+	ac.DB.Model(models.Order{}).Find(&o)
+	return c.Status(200).
+		JSON(fiber.Map{"message": "success",
+			"orders": o})
+}

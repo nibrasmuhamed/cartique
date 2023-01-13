@@ -75,7 +75,7 @@ func (uc *UserController) CheckOut(c *fiber.Ctx) error {
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String("inr"),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String("thing"),
+						Name: stripe.String(x[0].Name),
 					},
 					UnitAmount: stripe.Int64(int64(total * 100)),
 				},

@@ -22,3 +22,12 @@ type OrderResp struct {
 	Price     int    `json:"price"`
 	Status    string `json:"status"`
 }
+
+type OrderRespAdmin struct {
+	ID        uint   `json:"id"`
+	UserID    uint   `json:"user_id"`
+	ProductID uint   `json:"product_id"`
+	Quantity  int    `json:"quantity"`
+	Price     int    `json:"price"`
+	Status    string `json:"status"`
+}
