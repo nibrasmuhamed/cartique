@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	uuid "github.com/google/UUID"
+	uuid "github.com/google/uuid"
 	"github.com/nibrasmuhamed/cartique/database"
 	"github.com/nibrasmuhamed/cartique/models"
 	"github.com/nibrasmuhamed/cartique/util"
@@ -27,6 +27,31 @@ func NewUserController(DB *gorm.DB) *UserController {
 	return &UserController{DB}
 }
 
+func (uc *UserController) PrintInvoice(c *fiber.Ctx) error {
+	userID := int(c.Locals("userid").(float64))
+	aID, _ := strconv.Atoi(c.Params("id"))
+	var order models.Order
+	tx := uc.DB.First(&order, aID)
+	db := database.OpenDataBase()
+	resp := models.Invoice{Price: strconv.Itoa(order.Price), Quantity: strconv.Itoa(order.Quantity), CreatedAt: order.CreatedAt.Format("2006-01-02")}
+	defer database.CloseDatabase(db)
+	row := db.QueryRow("select name from products where id = ?", order.ProductID)
+	if err := row.Scan(&resp.Product); err != nil {
+		fmt.Println(err)
+	}
+	if tx.Error != nil {
+		fmt.Println(tx.Error)
+		return util.BadReq(c, "please send valid order id")
+	}
+	row = db.QueryRow("select username, phone from users where id = ?", userID)
+	err := row.Scan(&resp.Name, &resp.Phone)
+	if err != nil {
+		fmt.Println(err)
+	}
+	util.GenerateInvoice(resp)
+	x := c.BaseURL() + "/images/recipt.pdf"
+	return c.Status(200).JSON(fiber.Map{"message": "success", "link": x})
+}
 func (uc *UserController) CheckOut(c *fiber.Ctx) error {
 	userID := int(c.Locals("userid").(float64))
 	aID, _ := strconv.Atoi(c.Params("id"))
@@ -446,4 +471,13 @@ func (uc *UserController) RemoveFromCart(c *fiber.Ctx) error {
 	var cart models.Cart
 	uc.DB.Where("product_id=? AND user_id=?", productID, userID).Delete(&cart)
 	return c.Status(200).JSON(fiber.Map{"message": "success"})
+}
+
+func (uc *UserController) ShowOrders(c *fiber.Ctx) error {
+	userID := int(c.Locals("userid").(float64))
+	var Or []models.OrderRespUser
+	uc.DB.Model(models.Order{}).Where("user_id=?", userID).Find(&Or)
+	return c.Status(200).JSON(fiber.Map{"message": "success",
+		"orders": Or,
+	})
 }

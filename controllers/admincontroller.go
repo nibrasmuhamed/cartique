@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	uuid "github.com/google/UUID"
+	uuid "github.com/google/uuid"
 	"github.com/nibrasmuhamed/cartique/models"
 	"github.com/nibrasmuhamed/cartique/util"
 	"gorm.io/gorm"

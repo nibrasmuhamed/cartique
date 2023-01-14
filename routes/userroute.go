@@ -35,4 +35,7 @@ func (u *UserRouter) Routes(user fiber.Router) {
 	user.Get("/showwishlist", u.UserRoute.Showwishlist)
 	user.Get("/removewishlist/:id", u.UserRoute.RemoveFromWishList)
 
+	user.Get("/show_orders", middleware.UserMiddleware, u.UserRoute.ShowOrders)
+	user.Get("/print_invoice/:id", middleware.UserMiddleware, u.UserRoute.PrintInvoice)
+
 }

@@ -37,3 +37,20 @@ type OrderEdit struct {
 	Price    int    `json:"price"`
 	Status   string `json:"status"`
 }
+
+type OrderRespUser struct {
+	ID        uint
+	ProductID uint   `json:"product_id"`
+	Quantity  int    `json:"quantity"`
+	Price     int    `json:"price"`
+	Status    string `json:"status"`
+}
+
+type Invoice struct {
+	Product   string `json:"product"`
+	Quantity  string `json:"quantity"`
+	Price     string `json:"price"`
+	CreatedAt string
+	Name      string
+	Phone     string
+}
