@@ -31,3 +31,9 @@ type OrderRespAdmin struct {
 	Price     int    `json:"price"`
 	Status    string `json:"status"`
 }
+
+type OrderEdit struct {
+	Quantity int    `json:"quantity"`
+	Price    int    `json:"price"`
+	Status   string `json:"status"`
+}

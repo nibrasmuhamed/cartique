@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -17,6 +18,28 @@ type AdminController struct {
 
 func NewAdminController(DB *gorm.DB) *AdminController {
 	return &AdminController{DB}
+}
+
+func (ac *AdminController) EditOrders(c *fiber.Ctx) error {
+	orderID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		fmt.Println(err)
+		c.Status(400).JSON(fiber.Map{"message": "order id is invalid type"})
+	}
+	dbO := models.Order{}
+	tx := ac.DB.First(&dbO, orderID)
+	if tx.Error != nil {
+		c.Status(400).JSON(fiber.Map{"message": "no orders found associated with this email id"})
+	}
+	var oe models.OrderEdit
+	if err := c.BodyParser(&oe); err != nil {
+		fmt.Print(err)
+	}
+	dbO.Status = oe.Status
+	dbO.Price = oe.Price
+	dbO.Quantity = oe.Quantity
+	ac.DB.Save(&dbO)
+	return c.Status(200).JSON(fiber.Map{"message": "order edited success"})
 }
 
 func (ac *AdminController) EditUser(c *fiber.Ctx) error {

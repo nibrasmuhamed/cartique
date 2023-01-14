@@ -21,6 +21,7 @@ func (ar *AdminRouter) AdminRoute(admin fiber.Router) {
 	admin.Get("/logout", ar.AR.Logout)
 	order := admin.Group("order")
 	order.Get("view_orders", ar.AR.ViewOrders)
+	order.Post("edit_orders/:id", ar.AR.EditOrders)
 
 	userManagment := admin.Group("user_managment")
 	userManagment.Get("/", middleware.AdminMiddleware, ar.AR.ViewUsers)
