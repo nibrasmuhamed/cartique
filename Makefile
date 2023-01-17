@@ -1,6 +1,19 @@
-install:
-	curl https://dl.google.com/go/go1.19.4.linux-amd64.tar.gz --output go1.19.4.linux-amd64.tar.gz
-	rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.4.linux-amd64.tar.gz
-	export PATH=$PATH:/usr/local/go/bin
-run:
-	go run main.go
+
+server:
+	go run cmd/main.go
+
+build:
+	go build -o bin/server cmd/main.go
+
+d.up:
+	sudo docker-compose --env-file ./cartique/.env up
+
+d.down:
+	sudo docker-compose down
+
+d.up.build:
+	docker-compose --build up
+
+d.upd:
+	sudo docker-compose --env-file ./cartique/.env up -d
+	

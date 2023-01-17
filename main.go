@@ -45,5 +45,5 @@ func main() {
 	user := app.Group("/user")
 	ur.Routes(user)
 
-	log.Fatal(app.Listen("127.0.0.1:60000"))
+	log.Fatal(app.Listen("0.0.0.0:60000"))
 }

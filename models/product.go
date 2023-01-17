@@ -29,7 +29,15 @@ type ProductRespHome struct {
 	// Quantity    int      `json:"quantity"`
 	// Specs       string   `json:"specs"`
 }
-
+type ProductRespHomeDemo struct {
+	ID          uint   `gorm:"primarykey" json:"id"`
+	Images      string `json:"image_id" gorm:"column:photo"`
+	Category_id int    `json:"category_id" `
+	Name        string `json:"name"`
+	Price       int    `json:"price"`
+	// Quantity    int      `json:"quantity"`
+	// Specs       string   `json:"specs"`
+}
 type ProductResp struct {
 	ID          uint     `gorm:"primarykey" json:"id"`
 	Images      []string `json:"image_id" gorm:"column:photo"`

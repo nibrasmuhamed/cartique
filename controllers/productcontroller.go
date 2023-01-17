@@ -49,32 +49,25 @@ func (Pd *ProductDB) ShowAProduct(c *fiber.Ctx) error {
 func (Pd *ProductDB) ShowProducts(c *fiber.Ctx) error {
 	db := database.OpenDataBase()
 	defer database.CloseDatabase(db)
-	p := []models.ProductRespHome{}
+	p := []models.ProductRespHomeDemo{}
 	// uc.DB.Model(models.Product{}).Preload("Images", "photo is not null").Select("images.photo").Find(&p)
 
-	r, err := db.Query("SELECT id, name, price, category_id from products where products.deleted_at is null")
+	r, err := db.Query("SELECT products.id, name, price, category_id from products where products.deleted_at is null")
 	if err != nil {
 		fmt.Println("error is :", err)
 		return c.Status(500).JSON(fiber.Map{"message": "internal server error"})
 	}
 	defer r.Close()
 	for r.Next() {
-		a := models.ProductRespHome{}
+		a := models.ProductRespHomeDemo{}
 		err = r.Scan(&a.ID, &a.Name, &a.Price, &a.Category_id)
 		if err != nil {
 			fmt.Println("error while scanning ", err)
 		}
-		i, err := db.Query("SELECT photo FROM images WHERE images.product_id=?", a.ID)
+		row := db.QueryRow("select photo from images where product_id = ? AND deleted_at is NULL LIMIT 1", a.ID)
+		err := row.Scan(&a.Images)
 		if err != nil {
-			fmt.Println("2nd errror is:", err)
-		}
-		for i.Next() {
-			var x string
-			err = i.Scan(&x)
-			if err != nil {
-				fmt.Println(err)
-			}
-			a.Images = append(a.Images, x)
+			fmt.Println(err)
 		}
 		p = append(p, a)
 	}
