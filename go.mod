@@ -7,6 +7,7 @@ require (
 	github.com/gofiber/utils v1.0.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/UUID v1.0.0
+	github.com/google/uuid v1.3.0
 	github.com/johnfercher/maroto v0.39.0
 	github.com/joho/godotenv v1.4.0
 	github.com/stripe/stripe-go/v74 v74.5.0
@@ -21,7 +22,6 @@ require (
 	github.com/boombuler/barcode v1.0.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jung-kurt/gofpdf v1.16.2 // indirect
