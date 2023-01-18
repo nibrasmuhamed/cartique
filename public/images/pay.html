@@ -1,0 +1,34 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>checkout</title>
+        <script>
+            function callapi() {
+                fetch("/user/checkout/2", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization:
+                            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NzkzNTYwMDEsImlkIjo5LCJyb2xlIjoidXNlciJ9.-gjlznek3kfGFTGNWCgxG3YpZQ6ga_Hpl7k_hJlY5CM",
+                    },
+                })
+                    .then((res) => {
+                        if (res.ok) return res.json();
+                        return res.json().then((json) => Promise.reject(json));
+                    })
+                    .then(({ url }) => {
+                        window.location = url;
+                        // console.log(addresses);
+                    })
+                    .catch((e) => {
+                        console.log(e.error);
+                    });
+            }
+        </script>
+    </head>
+    <body>
+        <button onclick="callapi()" id="adb">checkout</button>
+    </body>
+</html>
