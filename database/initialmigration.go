@@ -57,3 +57,20 @@ func OpenDataBase() *sql.DB {
 func CloseDatabase(d *sql.DB) {
 	d.Close()
 }
+
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]: 2023/01/20 06:04:24 /home/ubuntu/cartique/database/initialmigration.go:26 Error 3780 (HY000): Referencing column 'category_id' and referenced column 'id' in foreign
+//  key constraint 'fk_categories_product_id' are incompatible.
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]: [8.822ms] [rows:0] ALTER TABLE `products` ADD CONSTRAINT `fk_categories_product_id` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`)
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]:
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]: 2023/01/20 06:04:24 /home/ubuntu/cartique/database/initialmigration.go:27 Error 3780 (HY000): Referencing column 'category_id' and referenced column 'id' in foreign
+//  key constraint 'fk_categories_product_id' are incompatible.
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]: [0.645ms] [rows:0] ALTER TABLE `products` ADD CONSTRAINT `fk_categories_product_id` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`)
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]:
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]: 2023/01/20 06:04:24 /home/ubuntu/cartique/database/initialmigration.go:29 Error 3780 (HY000): Referencing column 'category_id' and referenced column 'id' in foreign
+//  key constraint 'fk_categories_product_id' are incompatible.
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]: [0.554ms] [rows:0] ALTER TABLE `products` ADD CONSTRAINT `fk_categories_product_id` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`)
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]:
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]: 2023/01/20 06:04:24 /home/ubuntu/cartique/database/initialmigration.go:30 Error 3780 (HY000): Referencing column 'category_id' and referenced column 'id' in foreign
+//  key constraint 'fk_categories_product_id' are incompatible.
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]: [0.512ms] [rows:0] ALTER TABLE `products` ADD CONSTRAINT `fk_categories_product_id` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`)
+// Jan 20 06:04:24 ip-172-31-41-198 cartique[8244]:  ┌───────────────────────────────────────────────────┐

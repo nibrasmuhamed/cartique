@@ -33,7 +33,7 @@ func main() {
 
 	app := fiber.New()
 	// app.Use(csrf.New())
-	app.Static("/images", "./public/images")
+	app.Static("/", "./public")
 	// app.Get("/metrics", monitor.New(monitor.Config{Title: "MyService Metrics Page"}))
 	app.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",

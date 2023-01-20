@@ -76,7 +76,8 @@ func (Pd *ProductDB) ShowProducts(c *fiber.Ctx) error {
 
 func (pd *AdminController) AddProduct(c *fiber.Ctx) error {
 	p := models.Product{}
-	p.Category_id, _ = strconv.Atoi(c.FormValue("category_id"))
+	x, _ := strconv.Atoi(c.FormValue("category_id"))
+	p.Category_id = uint(x)
 	p.Price, _ = strconv.Atoi(c.FormValue("price"))
 	p.Quantity, _ = strconv.Atoi(c.FormValue("quantity"))
 	p.Specs = c.FormValue("spec")
@@ -118,7 +119,8 @@ func (pd *AdminController) EditProduct(c *fiber.Ctx) error {
 	if tx.Error != nil {
 		fmt.Println("txerr", tx.Error)
 	}
-	p.Category_id, _ = strconv.Atoi(c.FormValue("category_id"))
+	x, _ := strconv.Atoi(c.FormValue("category_id"))
+	p.Category_id = uint(x)
 	p.Price, _ = strconv.Atoi(c.FormValue("price"))
 	p.Quantity, _ = strconv.Atoi(c.FormValue("quantity"))
 	p.Specs = c.FormValue("spec")
