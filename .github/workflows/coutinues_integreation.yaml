@@ -1,0 +1,23 @@
+name: Countinuous Integretion 
+
+on:
+  push:
+    branches:
+      - "master"
+
+defaults:
+  run:
+    shell: bash
+  # working-directory: ./web
+
+jobs:
+  tests:
+    name: 'run unit tests'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        name: "Check out repository"
+
+      - name: "running test"
+        run: "cd routes && go test"
