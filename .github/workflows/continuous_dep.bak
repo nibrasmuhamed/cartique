@@ -1,0 +1,27 @@
+name: Create development staging environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      PR_number:
+        description: "Pull request number"
+        required: true
+  
+jobs:
+  create: 
+    name: "staging and deploy"
+    defaults:
+      run:
+        shell: bash
+    
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'verify pull request number'
+        uses: actions/github-script@v5
+        id: verify_pr_number
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          result-encoding: string
+          script: |
+            |
