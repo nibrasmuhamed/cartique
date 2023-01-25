@@ -26,3 +26,6 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+      
+    - name: Restart
+      run: sudo service cartique restart
