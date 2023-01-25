@@ -38,6 +38,7 @@ func main() {
 	app.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
+	app.Get("/", home)
 	products := app.Group("/products")
 	Pr.Routes(products)
 	admin := app.Group("/admin")
@@ -46,4 +47,8 @@ func main() {
 	ur.Routes(user)
 
 	log.Fatal(app.Listen("0.0.0.0:60000"))
+}
+
+func home(c *fiber.Ctx) error {
+	return c.SendString("for API doc, please visit github.com/nibrasmuhamed/cartique")
 }
