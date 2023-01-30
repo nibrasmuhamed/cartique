@@ -57,5 +57,5 @@ func main() {
 }
 
 func home(c *fiber.Ctx) error {
-	return c.SendString("for API doc, please visit github.com/nibrasmuhamed/cartique")
+	return c.SendString("for API doc, please visit https://github.com/nibrasmuhamed/cartique")
 }

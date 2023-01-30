@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartique-deployment 
+spec:
+  selector:
+    matchLabels:
+      app: cartique
+  template:
+    metadata:
+      labels:
+        app: cartique
+    spec:
+      containers:
+      - name: cartique
+        image: nibrasmuhamed/cartique:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 60000
+        env:
+          - name: DB_HOST
+            value: mysql-service
+          - name: DB_PORT
+            value: "3306"
+          - name: DB_USER
+            value: "root"
+          - name: DB_DATABASE
+            value: "cartique"
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: pgpassword
+                key: PG_PASS

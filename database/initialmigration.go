@@ -15,8 +15,18 @@ import (
 // var DB *gorm.DB
 
 func InitDB() *gorm.DB {
+	x := os.Getenv("DB_USER") + ":" + os.Getenv("DB_PASS") + "@tcp(" + os.Getenv("DB_HOST") + ":" + os.Getenv("DB_PORT") + ")" + "/"
+	db, err := sql.Open("mysql", x)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	_, err = db.Exec("CREATE DATABASE IF NOT EXISTS cartique")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
-	DB, err := gorm.Open(mysql.Open(os.Getenv("DB")), &gorm.Config{})
+	dsn := os.Getenv("DB_USER") + ":" + os.Getenv("DB_PASS") + "@tcp(" + os.Getenv("DB_HOST") + ":" + os.Getenv("DB_PORT") + ")" + "/" + os.Getenv("DB_DATABASE") + "?charset=utf8mb4&parseTime=True&loc=Local"
+	DB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Println("error in connecting database : ", err)
 	}
